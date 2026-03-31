@@ -2,293 +2,111 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Radio Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ON1X PREMIUM</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --neon: #00ff9d;
-            --bg: #0a0a0c;
-            --surface: #16161a;
-            --text-main: #e4e4e7;
-            --text-dim: #71717a;
-        }
-
-        /* Запрет выделения текста по всему приложению */
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
-            user-select: none; 
-            -webkit-user-select: none;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background: var(--bg);
-            color: var(--text-main);
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
+            background: radial-gradient(circle at 0% 0%, #1e1e2f 0%, #0a0a0c 50%, #1a0b2e 100%);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 20px;
             overflow: hidden;
         }
 
-        .app-shell {
-            width: 100%;
-            max-width: 450px;
-            background: var(--bg);
-            display: flex;
-            flex-direction: column;
-            position: relative;
+        /* Размываем только карточку с ID, основной текст оставляем четким */
+        .glass-card {
+            filter: blur(5px);
+            opacity: 0.5;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        /* Шапка */
-        header {
-            padding: 30px 20px 10px;
-            text-align: left;
-        }
-
-        header h1 {
-            font-size: 24px;
-            margin: 0;
-            letter-spacing: -1px;
-            color: white;
-        }
-
-        header span {
-            color: var(--neon);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* Кастомный селект */
-        .search-area {
-            padding: 15px 20px;
-        }
-
-        select {
-            width: 100%;
-            background: var(--surface);
-            color: white;
-            border: 1px solid #27272a;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 16px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        /* Список станций */
-        .list-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 20px;
-            mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
-        }
-
-        .station-card {
-            background: var(--surface);
-            margin-bottom: 10px;
-            padding: 16px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-        .station-card:active {
-            transform: scale(0.97);
-            background: #1f1f23;
-        }
-
-        .station-card.active {
-            border-color: var(--neon);
-            box-shadow: 0 0 15px rgba(0, 255, 157, 0.1);
-        }
-
-        .station-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .name { font-weight: 500; font-size: 15px; }
-        .tags { font-size: 11px; color: var(--text-dim); text-transform: lowercase; }
-
-        /* Панель управления (плеер) */
-        .player-bar {
-            background: #111114;
-            border-top: 1px solid #27272a;
-            padding: 25px 25px 40px;
-            border-radius: 30px 30px 0 0;
-        }
-
-        .now-playing-label {
-            font-size: 10px;
-            color: var(--neon);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: block;
-            text-align: center;
-        }
-
-        #current-title {
-            display: block;
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 20px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .play-trigger {
-            width: 70px;
-            height: 70px;
+        body::before {
+            content: "";
+            position: absolute;
+            width: 300px; height: 300px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            filter: blur(80px);
             border-radius: 50%;
+            top: 10%; right: -50px;
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .logo { font-weight: 900; font-size: 22px; letter-spacing: 1px; color: #fff; }
+        .status-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; margin-right: 8px; }
+        .status-wrap { display: flex; align-items: center; font-size: 12px; font-weight: 700; color: #aaa; }
+
+        .content { z-index: 10; margin-top: 40px; }
+        .title { font-size: 38px; font-weight: 900; line-height: 1.1; margin-bottom: 10px; }
+        .title span { background: linear-gradient(90deg, #6366f1, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .desc { font-size: 15px; color: #fff; line-height: 1.5; margin-bottom: 35px; font-weight: 700; }
+
+        .card-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .card-id { font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 1px; }
+
+        .footer { z-index: 10; margin-bottom: 10px; }
+
+        .btn {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            width: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            color: #fff;
             border: none;
-            background: var(--neon);
-            color: black;
-            font-size: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 25px rgba(0, 255, 157, 0.3);
+            padding: 22px;
+            border-radius: 18px;
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            transition: 0.3s;
         }
-
-        .vol-slider {
-            flex: 1;
-            height: 4px;
-            accent-color: var(--neon);
-            background: #27272a;
-            border-radius: 2px;
-        }
-
-        /* Скроллбар */
-        .list-container::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
-
-<div class="app-shell">
-    <header>
-        <span>Digital Tuner</span>
-        <h1>Global Radio</h1>
-    </header>
-
-    <div class="search-area">
-        <select id="countryPicker">
-            <option value="RU">🇷🇺 Russia</option>
-            <option value="US">🇺🇸 USA</option>
-            <option value="DE">🇩🇪 Germany</option>
-            <option value="FR">🇫🇷 France</option>
-            <option value="JP">🇯🇵 Japan</option>
-            <option value="BR">🇧🇷 Brazil</option>
-        </select>
+    <div class="header">
+        <div class="logo">ON1X</div>
+        <div class="status-wrap"><div class="status-dot"></div> <span id="status-txt">ЗАВЕРШЕН</span></div>
     </div>
 
-    <div class="list-container" id="stationsView">
-        </div>
-
-    <div class="player-bar">
-        <span class="now-playing-label" id="statusLabel">Ready to play</span>
-        <span id="current-title">Select a station</span>
-
-        <div class="controls-row">
-            <button class="play-trigger" id="masterPlay">▶</button>
-            <input type="range" class="vol-slider" id="volControl" min="0" max="1" step="0.05" value="0.5">
+    <div class="content">
+        <h1 class="title">РОЗЫГРЫШ<br><span>ЗАВЕРШЕН</span></h1>
+        <p class="desc">Следите за новостями в нашем канале</p>
+        <div class="glass-card">
+            <div class="card-label">Твой цифровой ID</div>
+            <div class="card-id" id="user-id">ОПРЕДЕЛЕНИЕ...</div>
         </div>
     </div>
-</div>
 
-<audio id="coreAudio"></audio>
+    <div class="footer">
+        <a href="https://t.me/ON1Xvpn" class="btn">Подписаться на канал</a>
+    </div>
 
-<script>
-    const audio = document.getElementById('coreAudio');
-    const masterPlay = document.getElementById('masterPlay');
-    const stationsView = document.getElementById('stationsView');
-    const countryPicker = document.getElementById('countryPicker');
-    const currentTitle = document.getElementById('current-title');
-    const statusLabel = document.getElementById('statusLabel');
-    const volControl = document.getElementById('volControl');
-
-    let isPlaying = false;
-
-    async function loadData(cc) {
-        stationsView.innerHTML = '<div style="opacity:0.3; text-align:center; margin-top:50px;">Scanning frequencies...</div>';
-        try {
-            const r = await fetch(`https://de1.api.radio-browser.info/json/stations/bycountrycodeexact/${cc}?limit=30&order=votes&reverse=true&https=true`);
-            const data = await r.json();
-            render(data);
-        } catch (e) {
-            stationsView.innerHTML = 'Error loading stations.';
+    <script>
+        const tg = window.Telegram.WebApp;
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('user-id').textContent = user.id;
         }
-    }
-
-    function render(list) {
-        stationsView.innerHTML = '';
-        list.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'station-card';
-            card.innerHTML = `
-                <div class="station-info">
-                    <div class="name">${s.name}</div>
-                    <div class="tags">${s.tags.slice(0, 30) || 'no tags'}</div>
-                </div>
-                <div style="color:var(--neon)">→</div>
-            `;
-            card.onclick = () => play(s.url_resolved, s.name, card);
-            stationsView.appendChild(card);
-        });
-    }
-
-    function play(url, name, el) {
-        document.querySelectorAll('.station-card').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-
-        statusLabel.innerText = 'Connecting...';
-        currentTitle.innerText = name;
-
-        audio.src = url;
-        audio.play().then(() => {
-            isPlaying = true;
-            masterPlay.innerText = '⏸';
-            statusLabel.innerText = 'Live Streaming';
-        }).catch(() => {
-            statusLabel.innerText = 'Stream Offline';
-            isPlaying = false;
-        });
-    }
-
-    masterPlay.onclick = () => {
-        if (!audio.src) return;
-        if (isPlaying) {
-            audio.pause();
-            masterPlay.innerText = '▶';
-            statusLabel.innerText = 'Paused';
-        } else {
-            audio.play();
-            masterPlay.innerText = '⏸';
-            statusLabel.innerText = 'Live Streaming';
-        }
-        isPlaying = !isPlaying;
-    };
-
-    volControl.oninput = (e) => audio.volume = e.target.value;
-    countryPicker.onchange = (e) => loadData(e.target.value);
-
-    // Инициализация
-    loadData('RU');
-</script>
-
+    </script>
 </body>
 </html>
