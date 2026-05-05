@@ -105,37 +105,66 @@
     </div>
 
     <div class="footer">
-        <button class="btn" id="main-btn">УЧАСТВОВАТЬ</button>
+        <button class="btn" id="main-btn" disabled>ЗАГРУЗКА...</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const sb = supabase.createClient('https://yvnnngfzzjdbeiscwluy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bm5uZ2Z6empkYmVpc2N3bHV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzY2ODYsImV4cCI6MjA5MDA1MjY4Nn0.SesGG2QhbJKfAklZDiL8oolWQ6qaTtBwRL_tvigpd9A');
+        tg.expand();
+
+        // Данные обновлены на raffle[cite: 1]
+        const SUPABASE_URL = 'https://yvnnngfzzjdbeiscwluy.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bm5uZ2Z6empkYmVpc2N3bHV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzY2ODYsImV4cCI6MjA5MDA1MjY4Nn0.SesGG2QhbJKfAklZDiL8oolWQ6qaTtBwRL_tvigpd9A';
         
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const user = tg.initDataUnsafe?.user;
         const btn = document.getElementById('main-btn');
+        const statusTxt = document.getElementById('status-txt');
+        const userIdDisplay = document.getElementById('user-id');
 
-        if (user) {
-            document.getElementById('user-id').textContent = user.id;
-        }
-
-        async function checkAndLock() {
-            if (!user) return;
-            const { data } = await sb.from('participants').select('id').eq('telegram_id', user.id.toString()).maybeSingle();
-            if (data) {
-                btn.textContent = "Уже участник";
-                btn.classList.add('btn-success');
+        async function init() {
+            if (!user || !user.id) {
+                userIdDisplay.textContent = "НЕ ОПРЕДЕЛЕН";
+                btn.textContent = "ОТКРОЙТЕ В ТЕЛЕГРАМ";
                 btn.disabled = true;
-                document.getElementById('status-txt').textContent = "ПОДТВЕРЖДЕН";
+                return;
+            }
+
+            userIdDisplay.textContent = user.id;
+            btn.textContent = "УЧАСТВОВАТЬ";
+            btn.disabled = false;
+
+            try {
+                // Проверка в таблице raffle[cite: 1]
+                const { data } = await sb
+                    .from('raffle')
+                    .select('telegram_id')
+                    .eq('telegram_id', user.id.toString())
+                    .maybeSingle();
+
+                if (data) {
+                    setAlreadyParticipant();
+                }
+            } catch (e) {
+                console.warn("Ошибка проверки участия:", e);
             }
         }
 
-        btn.onclick = async () => {
+        function setAlreadyParticipant() {
+            btn.textContent = "Уже участник";
+            btn.classList.add('btn-success');
             btn.disabled = true;
-            btn.textContent = "ПРОВЕРКА...";
+            statusTxt.textContent = "ПОДТВЕРЖДЕН";
+        }
+
+        btn.onclick = async () => {
+            if (!user) return;
+
+            btn.disabled = true;
+            btn.textContent = "ОБРАБОТКА...";
             
-            // Жёсткий UPSERT: если ID есть - обновит, если нет - создаст. Дублей НЕ БУДЕТ.
-            const { error } = await sb.from('participants').upsert({ 
+            // Сохранение в таблицу raffle[cite: 1]
+            const { error } = await sb.from('raffle').upsert({ 
                 telegram_id: user.id.toString(), 
                 first_name: user.first_name || '', 
                 username: user.username || '' 
@@ -146,12 +175,12 @@
                 btn.disabled = false;
                 btn.textContent = "УЧАСТВОВАТЬ";
             } else {
-                tg.showAlert("Вы приняли участие в розыгрыше!");
-                checkAndLock();
+                tg.showAlert("Поздравляем! Вы успешно зарегистрированы.");
+                setAlreadyParticipant();
             }
         };
 
-        checkAndLock();
+        init();
     </script>
 </body>
 </html>
