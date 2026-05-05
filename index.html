@@ -183,7 +183,7 @@
             if (!user) return;
 
             btn.disabled = true;
-            btn.textContent = "ОБРАБОТКА...";
+            btn.textContent = "Записываю..";
             
             // Запись данных в таблицу raffle
             const { error } = await sb.from('raffle').upsert({ 
@@ -197,7 +197,7 @@
                 btn.disabled = false;
                 btn.textContent = "УЧАСТВОВАТЬ";
             } else {
-                tg.showAlert("Вы приняои участие в розыгрыше!");
+                tg.showAlert("Вы приняли участие в розыгрыше ON1X VPN");
                 setAlreadyParticipant();
             }
         };
